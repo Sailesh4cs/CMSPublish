@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contentful Publish Blocker</title>
+  <script src="https://unpkg.com/contentful-ui-extensions-sdk/dist/cf-extension-api.min.js"></script>
+</head>
+<body>
+  <script>
+    const app = window.contentfulExtension.init(extension => {
+      extension.window.startAutoResizer();
+
+      extension.editor.on('beforePublish', async (event) => {
+        const entry = extension.entry.getSys();
+        const response = await fetch('http://localhost:3000/check-entry', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(entry),
+        });
+
+        const result = await response.json();
+        if (!result.allowPublish) {
+          event.preventDefault();
+          alert('Publishing blocked by custom logic.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
